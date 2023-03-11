@@ -13,7 +13,7 @@ echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
 
 # Avoid a Race condition by waiting 2 seconds. This can be calibrated to be shorter or longer if required for your system
 sleep 2
-#
+
 # Unload AMD kernel module
 modprobe -r amdgpu
 
