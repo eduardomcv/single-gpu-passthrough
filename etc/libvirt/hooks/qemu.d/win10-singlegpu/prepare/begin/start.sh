@@ -13,7 +13,7 @@ echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
 
 # Avoid a Race condition by waiting 2 seconds. This can be calibrated to be shorter or longer if required for your system
 sleep 2
-
+#
 # Unload AMD kernel module
 modprobe -r amdgpu
 
@@ -21,8 +21,14 @@ modprobe -r amdgpu
 virsh nodedev-detach pci_0000_03_00_0
 virsh nodedev-detach pci_0000_03_00_1
 
-# Load VFIO Kernel Module
+# Unbind Audio devices
+virsh nodedev-detach pci_0000_00_1f_0
+virsh nodedev-detach pci_0000_00_1f_3
+virsh nodedev-detach pci_0000_00_1f_4
+virsh nodedev-detach pci_0000_00_1f_5
+
+# Load VFIO Kernel Module  
 modprobe vfio
-modprobe vfio_pci
+modprobe vfio_pci  
 modprobe vfio_iommu_type1
 
