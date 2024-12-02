@@ -1,30 +1,27 @@
 #!/bin/bash
 set -x
 
+source "/etc/libvirt/hooks/kvm.conf"
+
+# Attach GPU devices to host
+virsh nodedev-reattach $VIRSH_GPU_VIDEO
+virsh nodedev-reattach $VIRSH_GPU_AUDIO
+
 # Unload vfio module
 modprobe -r vfio_pci
 modprobe -r vfio_iommu_type1
 modprobe -r vfio
-  
-# Rebind GPU
-virsh nodedev-reattach pci_0000_03_00_0
-virsh nodedev-reattach pci_0000_03_00_1
 
-# Rebind Audio devices
-virsh nodedev-reattach pci_0000_00_1f_0
-virsh nodedev-reattach pci_0000_00_1f_3
-virsh nodedev-reattach pci_0000_00_1f_4
-virsh nodedev-reattach pci_0000_00_1f_5
-
-# Reload AMD modules
+# Load AMD kernel module
 modprobe amdgpu
+modprobe snd_hda_intel
 
 # Rebind framebuffer to host
-echo "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
+# echo "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
 
-# Rebind VT consoles
+# Bind VTconsoles: might not be needed
 echo 1 > /sys/class/vtconsole/vtcon0/bind
-echo 1 > /sys/class/vtconsole/vtcon1/bind
+# echo 1 > /sys/class/vtconsole/vtcon1/bind
 
 # Restart Display Manager
 systemctl start display-manager
