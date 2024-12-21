@@ -9,12 +9,11 @@ virsh nodedev-reattach $VIRSH_GPU_AUDIO
 
 # Unload vfio module
 modprobe -r vfio_pci
-modprobe -r vfio_iommu_type1
 modprobe -r vfio
+modprobe -r vfio_iommu_type1
 
 # Load AMD kernel module
 modprobe amdgpu
-modprobe snd_hda_intel
 
 # Rebind framebuffer to host
 # echo "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind

@@ -23,9 +23,8 @@ virsh nodedev-detach $VIRSH_GPU_AUDIO
 
 # Unload kernel modules
 modprobe -r amdgpu
-modprobe -r snd_hda_intel
 
 # Load vfio module
-modprobe vfio
 modprobe vfio_pci
+modprobe vfio
 modprobe vfio_iommu_type1
