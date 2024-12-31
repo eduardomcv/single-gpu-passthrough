@@ -1,16 +1,22 @@
-<domain type="kvm">
+<domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0" type="kvm">
   <name>win10</name>
-  <uuid>ffd9771b-d500-41ab-abc5-b4c7026af5ff</uuid>
+  <uuid>a81fe4ae-5b2d-4e48-b8d9-44779d40e2c5</uuid>
   <metadata>
     <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
       <libosinfo:os id="http://microsoft.com/win/10"/>
     </libosinfo:libosinfo>
   </metadata>
-  <memory unit="KiB">28672000</memory>
-  <currentMemory unit="KiB">28672000</currentMemory>
-  <vcpu placement="static">16</vcpu>
-  <os>
+  <memory unit="KiB">24422400</memory>
+  <currentMemory unit="KiB">24422400</currentMemory>
+  <vcpu placement="static">12</vcpu>
+  <os firmware="efi">
     <type arch="x86_64" machine="pc-q35-9.1">hvm</type>
+    <firmware>
+      <feature enabled="no" name="enrolled-keys"/>
+      <feature enabled="no" name="secure-boot"/>
+    </firmware>
+    <loader readonly="yes" type="pflash" format="raw">/usr/share/edk2/x64/OVMF_CODE.4m.fd</loader>
+    <nvram template="/usr/share/edk2/x64/OVMF_VARS.4m.fd" templateFormat="raw" format="raw">/var/lib/libvirt/qemu/nvram/win10_VARS.fd</nvram>
   </os>
   <features>
     <acpi/>
@@ -19,11 +25,15 @@
       <relaxed state="on"/>
       <vapic state="on"/>
       <spinlocks state="on" retries="8191"/>
+      <vendor_id state="on" value="randomid"/>
     </hyperv>
+    <kvm>
+      <hidden state="on"/>
+    </kvm>
     <vmport state="off"/>
   </features>
   <cpu mode="host-passthrough" check="none" migratable="on">
-    <topology sockets="1" dies="1" clusters="1" cores="16" threads="1"/>
+    <topology sockets="1" dies="1" clusters="1" cores="6" threads="2"/>
   </cpu>
   <clock offset="localtime">
     <timer name="rtc" tickpolicy="catchup"/>
@@ -41,14 +51,14 @@
   <devices>
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type="file" device="disk">
-      <driver name="qemu" type="qcow2"/>
-      <source file="/home/eduardo/Virtual Disks/win10.qcow2"/>
+      <driver name="qemu" type="qcow2" discard="unmap"/>
+      <source file="/home/eduardo/Virtual Disks/win10-2.qcow2"/>
       <target dev="vda" bus="virtio"/>
-      <boot order="1"/>
-      <address type="pci" domain="0x0000" bus="0x03" slot="0x00" function="0x0"/>
+      <boot order="2"/>
+      <address type="pci" domain="0x0000" bus="0x04" slot="0x00" function="0x0"/>
     </disk>
     <controller type="usb" index="0" model="qemu-xhci" ports="15">
-      <address type="pci" domain="0x0000" bus="0x01" slot="0x00" function="0x0"/>
+      <address type="pci" domain="0x0000" bus="0x02" slot="0x00" function="0x0"/>
     </controller>
     <controller type="pci" index="0" model="pcie-root"/>
     <controller type="pci" index="1" model="pcie-root-port">
@@ -123,8 +133,8 @@
     </controller>
     <controller type="pci" index="15" model="pcie-root-port">
       <model name="pcie-root-port"/>
-      <target chassis="15" port="0x1e"/>
-      <address type="pci" domain="0x0000" bus="0x00" slot="0x03" function="0x6"/>
+      <target chassis="15" port="0x8"/>
+      <address type="pci" domain="0x0000" bus="0x00" slot="0x01" function="0x0"/>
     </controller>
     <controller type="pci" index="16" model="pcie-to-pci-bridge">
       <model name="pcie-pci-bridge"/>
@@ -134,45 +144,17 @@
       <address type="pci" domain="0x0000" bus="0x00" slot="0x1f" function="0x2"/>
     </controller>
     <controller type="virtio-serial" index="0">
-      <address type="pci" domain="0x0000" bus="0x02" slot="0x00" function="0x0"/>
+      <address type="pci" domain="0x0000" bus="0x03" slot="0x00" function="0x0"/>
     </controller>
     <interface type="network">
-      <mac address="52:54:00:4c:d6:c5"/>
+      <mac address="52:54:00:be:4a:0d"/>
       <source network="default"/>
-      <model type="e1000e"/>
-      <address type="pci" domain="0x0000" bus="0x05" slot="0x00" function="0x0"/>
+      <model type="virtio"/>
+      <address type="pci" domain="0x0000" bus="0x01" slot="0x00" function="0x0"/>
     </interface>
     <input type="mouse" bus="ps2"/>
     <input type="keyboard" bus="ps2"/>
-    <graphics type="vnc" port="-1" autoport="yes" listen="0.0.0.0">
-      <listen type="address" address="0.0.0.0"/>
-    </graphics>
     <audio id="1" type="none"/>
-    <video>
-      <model type="cirrus" vram="16384" heads="1" primary="yes"/>
-      <address type="pci" domain="0x0000" bus="0x00" slot="0x01" function="0x0"/>
-    </video>
-    <hostdev mode="subsystem" type="usb" managed="yes">
-      <source>
-        <vendor id="0x3434"/>
-        <product id="0x0361"/>
-      </source>
-      <address type="usb" bus="0" port="1"/>
-    </hostdev>
-    <hostdev mode="subsystem" type="usb" managed="yes">
-      <source>
-        <vendor id="0x045e"/>
-        <product id="0x028e"/>
-      </source>
-      <address type="usb" bus="0" port="2"/>
-    </hostdev>
-    <hostdev mode="subsystem" type="usb" managed="yes">
-      <source>
-        <vendor id="0x1b1c"/>
-        <product id="0x1b8b"/>
-      </source>
-      <address type="usb" bus="0" port="3"/>
-    </hostdev>
     <hostdev mode="subsystem" type="pci" managed="yes">
       <source>
         <address domain="0x0000" bus="0x03" slot="0x00" function="0x0"/>
@@ -184,6 +166,27 @@
         <address domain="0x0000" bus="0x03" slot="0x00" function="0x1"/>
       </source>
       <address type="pci" domain="0x0000" bus="0x07" slot="0x00" function="0x0"/>
+    </hostdev>
+    <hostdev mode="subsystem" type="usb" managed="yes">
+      <source>
+        <vendor id="0x3434"/>
+        <product id="0x0361"/>
+      </source>
+      <address type="usb" bus="0" port="1"/>
+    </hostdev>
+    <hostdev mode="subsystem" type="usb" managed="yes">
+      <source>
+        <vendor id="0x1b1c"/>
+        <product id="0x1b8b"/>
+      </source>
+      <address type="usb" bus="0" port="2"/>
+    </hostdev>
+    <hostdev mode="subsystem" type="usb" managed="yes">
+      <source>
+        <vendor id="0x8087"/>
+        <product id="0x0026"/>
+      </source>
+      <address type="usb" bus="0" port="3"/>
     </hostdev>
     <hostdev mode="subsystem" type="pci" managed="yes">
       <source>
@@ -211,7 +214,10 @@
     </hostdev>
     <watchdog model="itco" action="reset"/>
     <memballoon model="virtio">
-      <address type="pci" domain="0x0000" bus="0x04" slot="0x00" function="0x0"/>
+      <address type="pci" domain="0x0000" bus="0x05" slot="0x00" function="0x0"/>
     </memballoon>
   </devices>
+  <qemu:capabilities>
+    <qemu:del capability="usb-host.hostdevice"/>
+  </qemu:capabilities>
 </domain>
